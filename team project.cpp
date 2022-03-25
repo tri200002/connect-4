@@ -1,10 +1,10 @@
+# import <iostream>
+
 int main() {
     // False = ‘X’
     // True = ‘O’
-    boolean playerTurn = false;
+    bool playerTurn = false;
 
-
-    Scanner kb = new Scanner(System.in);
     char[][] board = { {‘_’, ‘_’, ‘_’, ‘_’, ‘_’, ‘_’, ‘_’},
                        {‘_’, ‘_’, ‘_’, ‘_’, ‘_’, ‘_’, ‘_’}, 
                        {‘_’, ‘_’, ‘_’, ‘_’, ‘_’, ‘_’, ‘_’},
@@ -38,7 +38,7 @@ int main() {
 }
 
 
-public drawBoard(String[][] b) {
+public void drawBoard(String[][] b) {
     for(int r = 0; r < b.length; r++) {
         for(int c = 0; c < b[r].length; c++) {
             cout << “|” << b[r][c]; 
@@ -48,17 +48,17 @@ public drawBoard(String[][] b) {
 }
 
 
-public boolean winCheck(char[][] board, int[] play) {
+public bool winCheck(char[][] board, int[] play) {
         
 }
 
 
-public aIChoice(char[][] board, int[] play) {
+public int aIChoice(char[][] board, int[] play) {
         
 }
 
 
-public void addPiece (char[][] board, int choice, boolean playerTurn) {
+public int[] addPiece (char[][] board, int choice, boolean playerTurn) {
     for (int row = 0; row < 6; row++) {
         if(board[row][choice] == '_') {
             if(!playerTurn) {
