@@ -86,7 +86,7 @@ public int playerChoice(char** board, int* play) {
     return choice;
 }
 
-public int* addPiece (char** board, int choice, boolean playerTurn) {
+public int* addPiece (char** board, int choice, bool playerTurn) {
     static int[] result = {-1, choice}
     
     for (int row = 0; row < 6; row++) {
