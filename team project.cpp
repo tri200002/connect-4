@@ -1,51 +1,7 @@
-# import <iostream>
+# include <iostream>
+using namespace std;
 
-int main() {
-    // False = ‘X’
-    // True = ‘O’
-    bool playerTurn = false;
-    
-    char** board = { {'_', '_', '_', '_', '_', '_', '_'},
-                       {'_', '_', '_', '_', '_', '_', '_'}, 
-                       {'_', '_', '_', '_', '_', '_', '_'},
-                       {'_', '_', '_', '_', '_', '_', '_'},
-                       {'_', '_', '_', '_', '_', '_', '_'},
-                       {'_', '_', '_', '_', '_', '_', '_'},
-                       {'_', '_', '_', '_', '_', '_', '_'} };
-    
-    int choice;
-    
-    
-    int counter = 0;
-    while(counter < 42) {
-        drawBoard(board);
-        
-        if(playerTurn){
-            choice = playerChoice(board);
-    
-        } else {
-            choice = AIChoice(board);
-        }
-    
-        int[] play = addPiece(board, choice, playerTurn); // row and col of play
-    
-        bool win = winCheck(board, play);
-        if(win){
-            if(playerTurn) {
-                // You win
-            } else {
-                // You lost
-            }
-        }
-        
-        playerTurn = !playerTurn;
-    }
-    // You Tied
-    return 0;
-}
-
-
-public void drawBoard(char** b) {
+void drawBoard(char** b) {
     for(int r = 0; r < sizeof(b) ; r++) {
         for(int c = 0; c < sizeof(b[r] ); c++) {
             cout << "|" << b[r][c]; 
@@ -55,16 +11,16 @@ public void drawBoard(char** b) {
 }
 
 
-public bool winCheck(char** board, int* play) {
+bool winCheck(char** board, int* play) {
     
 }
 
 
-public int aIChoice(char** board, int* play) {
+int aIChoice(char** board) {
     
 }
 
-public int playerChoice(char** board, int* play) {
+int playerChoice(char** board) {
     bool good = false;
     int choice;
     while(!good) {
@@ -86,8 +42,8 @@ public int playerChoice(char** board, int* play) {
     return choice;
 }
 
-public int* addPiece (char** board, int choice, bool playerTurn) {
-    static int[] result = {-1, choice}
+int* addPiece (char** board, int choice, bool playerTurn) {
+    static int result[] = {-1, choice};
     
     for (int row = 0; row < 6; row++) {
         if(board[row][choice] == '_') {
@@ -105,4 +61,54 @@ public int* addPiece (char** board, int choice, bool playerTurn) {
         }
     }
     
+}
+
+char** setUpBoard() {
+    static char* result[6];
+    for(int i = 0; i < 6; i++ ){
+        static char row[] = {'_', '_', '_', '_', '_', '_', '_'};
+        result[i] = row;
+    }
+    return result;
+}
+
+// ======================================================================================
+// ======================================================================================
+
+int main() {
+    // False = ‘X’
+    // True = ‘O’
+    bool playerTurn = false;
+    
+    char** board = setUpBoard();
+    
+    int choice;
+    
+    
+    int counter = 0;
+    while(counter < 42) {
+        drawBoard(board);
+        
+        if(playerTurn){
+            choice = playerChoice(board);
+    
+        } else {
+            choice = aIChoice(board);
+        }
+    
+        int* play = addPiece(board, choice, playerTurn); // row and col of play
+    
+        bool win = winCheck(board, play);
+        if(win){
+            if(playerTurn) {
+                // You win
+            } else {
+                // You lost
+            }
+        }
+        
+        playerTurn = !playerTurn;
+    }
+    // You Tied
+    return 0;
 }
