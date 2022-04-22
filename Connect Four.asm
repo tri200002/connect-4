@@ -177,7 +177,7 @@ wincheck:
 				bne $t5, $s7, breakBackDiagonalLoop3
 				
 			addi $t2, 9
-			bne $t2, 36, backDiagonalLoop3
+			bne $t2, 27, backDiagonalLoop3
 			j gameEnd					# if the code reaches here, then four are in a row
 			# or alternatively change a register to some value that indicates a win, and jr $ra
 		
@@ -207,7 +207,7 @@ wincheck:
 				bne $t5, $s7, breakFrontDiagonalLoop3
 				
 			addi $t2, 7
-			bne $t2, 28, frontDiagonalLoop3
+			bne $t2, 21, frontDiagonalLoop3
 			j gameEnd					# if the code reaches here, then four are in a row
 			# or alternatively change a register to some value that indicates a win, and jr $ra
 		
