@@ -21,7 +21,9 @@ main:
 	# Loads board address into $s0
 	la $s0, board
 	li $s7, 0	# turn counter
+	
 	jal drawboard
+	jal drawBoard
 	
 	gameplayloop:
 		# put turnCounter % 2 in $t0
@@ -46,7 +48,7 @@ main:
 drawboard:
 	# print a newline
 	li $v0, 11
-	la $a0, '\n'
+	li $a0, '\n'
 	
 	li $t1, 0
 	Loop:
@@ -56,8 +58,8 @@ drawboard:
 		syscall
 		
 		# get next cell of board to print
-		add $a0, $s0, $t1
-		lb $a0, ($a0)
+		add $t0, $s0, $t1
+		lb $a0, ($t0)
 		# print cell
 
 		#increment counter
@@ -100,6 +102,7 @@ AIchoice:
 	
 	# set $s5 to AI play value
 	li $s5, 'X'
+	lw $a2, P2Color
 jr $ra
 
 # ==========================================================================================
@@ -126,6 +129,7 @@ playerchoice:
 	# save user input
 	addi $s6, $t2, 0
 	li $s5, 'O'
+	lw $a2, P1Color
 jr $ra
 
 inputerror:
@@ -147,6 +151,9 @@ j playerchoice
 # ==========================================================================================
 
 droppiece:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
 	# Get the coressponding row's counter
 	lb $t3, counters($s6)
 	
@@ -159,7 +166,13 @@ droppiece:
 	#Decrement counter
 	add $t3, $t3, -1
 	sb $t3, counters($s6)
+	
+	addi $a0, $s6, 0
+	addi $a1, $t3, 1
+	jal drawToken
 		
+lw $ra, 0($sp)
+addi $sp, $sp, 4
 jr $ra
 
 # ==========================================================================================
@@ -236,9 +249,9 @@ jr $ra
 # ==========================================================================================
 # check who won
 gameEnd:		
-		# if turn is odd AI Won, else player won
+		# if previous turn is odd AI Won, else player won
 		andi $t0, $s6, 1
-		bnez $t0, AIWin
+		beqz $t0, AIWin
 		
 # print 'You Won! :D', then exit
 PlayerWin:	
@@ -266,3 +279,5 @@ exit:
 	#End program
 	li $v0, 10
 	syscall
+
+.include "connectFourGraphics.asm"
