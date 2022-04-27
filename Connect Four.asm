@@ -236,9 +236,9 @@ jr $ra
 # ==========================================================================================
 # check who won
 gameEnd:		
-		# if turn is odd AI Won, else player won
-		andi $t0, $s6, 1
-		bnez $t0, AIWin
+		# if previous turn is odd AI Won, else player won
+		andi $t0, $s7, 1
+		beqz $t0, AIWin
 		
 # print 'You Won! :D', then exit
 PlayerWin:	
