@@ -8,7 +8,7 @@
 	AIWinMsg:			.asciiz		"You lost :( \n"
 	PlayerWinMsg:		.asciiz		"You Won! :D \n"
 	
-	playAgainPrompt:	.asciiz		"Would you like to play agian? (y/n) \n"
+	playAgainPrompt:	.asciiz		"Would you like to play again? (y/n) \n"
 	InvalidExitChoice:	.asciiz		"Input must be either 'y' or 'n' \n"
 	
 	.align 2	# word align it
