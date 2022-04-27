@@ -4,15 +4,17 @@
 	cputurn: 		.asciiz 	"\nCPU's turn: "
 	rowFullMsg:		.asciiz		"\nRow is full, choose a different one"
 	
-	TieMsg:				.asciiz	 	"Game was a Tie :|"
-	AIWinMsg:			.asciiz		"You lost :("
-	PlayerWinMsg:		.asciiz		"You Won! :D"
+	TieMsg:			.asciiz	 	"Game was a Tie :|"
+	AIWinMsg:		.asciiz		"You lost :("
+	PlayerWinMsg:	.asciiz		"You Won! :D"
 	
 	.align 2	# word align it
 	board: 			.ascii 		"_______\n_______\n_______\n_______\n_______\n_______\0"
 	
 	.align 2	# word align counters
 	counters: 		.byte 		5, 5, 5, 5, 5, 5, 5
+	
+	index:			.word		0
 
 # ==========================================================================================
 .text
@@ -153,6 +155,7 @@ droppiece:
 	# Calculate index
 	mul $t4, $t3, 8
 	add $t5, $t4, $s6 # t5 contains index
+	sw $t5, index
 	add $t0, $s0, $t5
 	sb $s5, ($t0)
 	
@@ -224,7 +227,30 @@ wincheck:
 	bne $t0, 24, frontDiagonalLoop1
 	
 	# check the - direction
+	lw $t8, index
+	la $s4, board
+	add $s4, $s4, $t8
+	add $t9, $zero, 0
+	add $s2, $s4, 0
+	rightloop: #Check the right side
+		add $s4, $s4, 1 #Go to the next char
+		lb $s1, ($s4)
+		beq $s1, '\n', leftloop #If next right character is newline check left side
+		bne $s1, $s5, leftloop #If next right character is not the currently played char check left
+		add $t9, $t9, 1 #add 1 to counter if it is the same char
+		beq $t9, 3, gameEnd #If there are 3 neighbouring consec chars + 1 played char, there is a winner
+		j rightloop 
 	
+	leftloop:
+		add $s2, $s2, -1 #Go to the prev char
+		lb $s1, ($s2)
+		beq $s1, '\n', breakhorizontal #If prev left character is newline, there are no winners
+		bne $s1, $s5, breakhorizontal #If prev left character is not the currently played char, there are no winners
+		add $t9, $t9, 1 #add 1 to counter if it is the same char
+		beq $t9, 3, gameEnd #If there are 3 neighbouring consec chars + 1 played char, there is a winner
+		j leftloop
+		
+	breakhorizontal:
 	
 	# check the | direction
 	
