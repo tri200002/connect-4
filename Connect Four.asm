@@ -296,17 +296,19 @@ Tie:
 resetBoard:
 	li $t0, 0
 	resetBoardLoop1:
-		li $t1, 0
-		resetBoardLoop2:
-			add $t2, $t0, $t1
-			li $t3 '_'
-			sb $t3, board($t2)
-			
-		addi $t1, $t1, 1
-		bne $t1, 7, resetBoardLoop2
+		lui $t1, 0x5f5f
+		addi $t1, $t1, 0x5f5f
+		lui $t2, 0x0a5f
+		addi $t2, $t2, 0x5f5f
+		
+		sw $t1, board($t0)
+		sw $t2, board+4($t0)
 		
 	addi $t0, $t0, 8
 	bne $t0, 48, resetBoardLoop1
+	
+	li $t1, 0
+	sb $t1, board+-1($t0)
 	
 	lui $t0, 0x0505
 	addi $t0, $t0, 0x0505
