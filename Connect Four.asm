@@ -308,9 +308,9 @@ resetBoard:
 	addi $t0, $t0, 8
 	bne $t0, 48, resetBoardLoop1
 	
-	li $t0, 0x0505
-	sh $t0, counters+0($zero)
-	sh $t0, counters+2($zero)
+	lui $t0, 0x0505
+	addi $t0, $t0, 0x0505
+	sw $t0, counters+0($zero)
 	sh $t0, counters+4($zero)
 	sb $t0, counters+6($zero)
 j main
