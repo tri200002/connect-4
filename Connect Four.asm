@@ -325,6 +325,8 @@ resetBoard:
 	sh $t0, counters+0($zero)
 	sh $t0, counters+2($zero)
 	sh $t0, counters+4($zero)
+	sb $t0, counters+6($zero)
+	jal clearBoard
 j main
 
 exit: 

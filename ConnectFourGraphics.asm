@@ -18,6 +18,7 @@
 	.globl drawToken
 	.globl P1Color
 	.globl P2Color
+	.globl clearBoard
 .text
 
 # ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
@@ -74,6 +75,32 @@ sw $ra, 0($sp)
 		addi $t0, $t0, 4
 		bne $t0, 63336, loop
 	
+		jal drawCells
+	
+	# end and return	
+		
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+	
+jr $ra		
+
+# ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
+clearBoard:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
+
+	jal drawCells
+	jal clearChevron
+	
+lw $ra, 0($sp)
+addi $sp, $sp, 4
+jr $ra
+# ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
+
+# draws the empty cells
+drawCells:
+addi $sp, $sp, -4
+sw $ra, 0($sp)
 	# draw cells
 		lw $a2, bgColor	# white
 		# set Y value to 3 so there is an edge
@@ -97,13 +124,10 @@ sw $ra, 0($sp)
 		addi $a1, $a1, 1
 		# if we've finished drawing 6 rows; break
 		bne $a1, 6, outerLoop
-	
-	# end and return	
-		
+
 lw $ra, 0($sp)
 addi $sp, $sp, 4
-	
-jr $ra		
+jr $ra
 
 # ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
 
