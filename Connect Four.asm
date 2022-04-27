@@ -1,20 +1,23 @@
 .data
-	userprompt: 	.asciiz 	"\nEnter the row (1-7) you want to place your piece: "
-	usererror: 		.asciiz 	"\nInvalid input. Please enter a row from 1-7" 
-	cputurn: 		.asciiz 	"\nCPU's turn: "
-	rowFullMsg:		.asciiz		"\nRow is full, choose a different one"
+	userprompt: 		.asciiz 	"\nEnter the row (1-7) you want to place your piece: "
+	usererror: 			.asciiz 	"\nInvalid input. Please enter a row from 1-7" 
+	cputurn: 			.asciiz 	"\nCPU's turn: "
+	rowFullMsg:			.asciiz		"\nRow is full, choose a different one"
 	
-	TieMsg:			.asciiz	 	"Game was a Tie :|"
-	AIWinMsg:		.asciiz		"You lost :("
-	PlayerWinMsg:	.asciiz		"You Won! :D"
+	TieMsg:				.asciiz	 	"Game was a Tie :| \n"
+	AIWinMsg:			.asciiz		"You lost :( \n"
+	PlayerWinMsg:		.asciiz		"You Won! :D \n"
+	
+	playAgainPrompt:	.asciiz		"Would you like to play agian? (y/n) \n"
+	InvalidExitChoice:	.asciiz		"Input must be either 'y' or 'n' \n"
 	
 	.align 2	# word align it
-	board: 			.ascii 		"_______\n_______\n_______\n_______\n_______\n_______\0"
+	board: 				.ascii 		"_______\n_______\n_______\n_______\n_______\n_______\0"
 	
 	.align 2	# word align counters
-	counters: 		.byte 		5, 5, 5, 5, 5, 5, 5
+	counters: 			.byte 		5, 5, 5, 5, 5, 5, 5
 	
-	index:			.word		0
+	index:				.word		0
 
 # ==========================================================================================
 .text
@@ -287,8 +290,49 @@ Tie:
 		li $v0, 4
 		syscall
 		li $t4, 57
-# =============		
+		j exit
+# =============
+
+resetBoard:
+	li $t0, 0
+	resetBoardLoop1:
+		li $t1, 0
+		resetBoardLoop2:
+			add $t2, $t0, $t1
+			li $t3 '_'
+			sb $t3, board($t2)
+			
+		addi $t1, $t1, 1
+		bne $t1, 7, resetBoardLoop2
+		
+	addi $t0, $t0, 8
+	bne $t0, 48, resetBoardLoop1
+	
+	li $t0, 0x0505
+	sh $t0, counters+0($zero)
+	sh $t0, counters+2($zero)
+	sh $t0, counters+4($zero)
+j main
+
 exit: 
+
+	li $v0, 4
+	la $a0, playAgainPrompt
+	syscall
+	
+	li $v0, 12
+	syscall
+	
+	beq $v0, 'n', trueExit
+	beq $v0, 'y', resetBoard
+	
+	li $v0, 4
+	la $a0, InvalidExitChoice
+	syscall
+	
+	j exit
+	
+trueExit:	
 	#End program
 	li $v0, 10
 	syscall
