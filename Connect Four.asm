@@ -253,7 +253,20 @@ wincheck:
 	breakhorizontal:
 	
 	# check the | direction
-	
+	li $t0, 0
+	Loop1:
+		move $t2, $t0
+		li $t3, 0
+		Loop2:
+			lb $t1, board($t2)
+			bne $s5, $t1, Cont
+			addi $t2, $t2, 8
+			addi $t3, $t3, 1
+			beq $t3, 4, gameEnd
+		j Loop2
+	Cont:
+	addi $t0, $t0, 1
+	bne $t0, 23, Loop1
 	
 	# if all spots are filled
 	beq $s7, 42, Tie
