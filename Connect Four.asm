@@ -233,25 +233,23 @@ wincheck:
 	lw $t8, index
 	la $s4, board
 	add $s4, $s4, $t8
-	add $t9, $zero, 0
+	li $t9,  0
 	add $s2, $s4, 0
 	rightloop: #Check the right side
 		add $s4, $s4, 1 #Go to the next char
 		lb $s1, ($s4)
-		beq $s1, '\n', leftloop #If next right character is newline check left side
 		bne $s1, $s5, leftloop #If next right character is not the currently played char check left
 		add $t9, $t9, 1 #add 1 to counter if it is the same char
 		beq $t9, 3, gameEnd #If there are 3 neighbouring consec chars + 1 played char, there is a winner
-		j rightloop 
+	j rightloop 
 	
 	leftloop:
 		add $s2, $s2, -1 #Go to the prev char
 		lb $s1, ($s2)
-		beq $s1, '\n', breakhorizontal #If prev left character is newline, there are no winners
 		bne $s1, $s5, breakhorizontal #If prev left character is not the currently played char, there are no winners
 		add $t9, $t9, 1 #add 1 to counter if it is the same char
 		beq $t9, 3, gameEnd #If there are 3 neighbouring consec chars + 1 played char, there is a winner
-		j leftloop
+	j leftloop
 		
 	breakhorizontal:
 	
