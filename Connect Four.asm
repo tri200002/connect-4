@@ -9,7 +9,7 @@
 	PlayerWinMsg:		.asciiz		"You Won! :D \n"
 	
 	playAgainPrompt:	.asciiz		"Would you like to play again? (y/n) \n"
-	InvalidExitChoice:	.asciiz		"Input must be either 'y' or 'n' \n"
+	InvalidExitChoice:	.asciiz		"\nInput must be either 'y' or 'n' \n"
 	
 	.align 2	# word align it
 	board: 				.ascii 		"_______\n_______\n_______\n_______\n_______\n_______\0"
@@ -295,21 +295,24 @@ Tie:
 
 resetBoard:
 	li $t0, 0
-	resetBoardLoop1:
+	resetBoardLoop:
 		lui $t1, 0x5f5f
-		addi $t1, $t1, 0x5f5f
-		lui $t2, 0x0a5f
-		addi $t2, $t2, 0x5f5f
+		addi $t1, $t1, 0x5f5f	# "____"
 		
+		lui $t2, 0x0a5f			
+		addi $t2, $t2, 0x5f5f	# "___\n"
+		
+		# set row to '_''_''_''_''_''_''_''\n'
 		sw $t1, board($t0)
 		sw $t2, board+4($t0)
 		
+	# loop to next row
 	addi $t0, $t0, 8
-	bne $t0, 48, resetBoardLoop1
+	bne $t0, 48, resetBoardLoop
 	
 	li $t1, 0
-	sb $t1, board+-1($t0)
-	
+	sb $t1, board+-1($t0)		# last byte is '\0'
+	# reset counters to 5
 	lui $t0, 0x0505
 	addi $t0, $t0, 0x0505
 	sw $t0, counters+0($zero)
