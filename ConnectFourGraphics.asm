@@ -13,7 +13,6 @@
 	smallCircleLineArray:		.byte	4,	6,	8,	8,	8,	8,	6,	4
 	smallCircleXOffsetArray:	.byte	2,	1,	0,	0,	0,	0,	1,	2
 	
-	.globl main
 	.globl drawBoard
 	.globl drawToken
 	.globl P1Color

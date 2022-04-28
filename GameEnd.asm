@@ -7,6 +7,7 @@
 	InvalidExitChoice:	.asciiz		"Input must be either 'y' or 'n' \n"
 	
 	.globl gameEnd
+	.globl Tie
 .text
 # ==========================================================================================
 # check who won
@@ -45,8 +46,9 @@ resetBoard:
 		li $t1, 0
 		resetBoardLoop2:
 			add $t2, $t0, $t1
+			add $t2, $t2, $s0
 			li $t3 '_'
-			sb $t3, board($t2)
+			sb $t3, ($t2)
 			
 		addi $t1, $t1, 1
 		bne $t1, 7, resetBoardLoop2

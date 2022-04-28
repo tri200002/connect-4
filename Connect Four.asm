@@ -6,7 +6,11 @@
 	counters: 			.byte 		5, 5, 5, 5, 5, 5, 5
 	
 	index:				.word		0
-
+	
+.globl main
+.globl newGame
+.globl index
+.globl counters
 # ==========================================================================================
 .text
 

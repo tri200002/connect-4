@@ -62,7 +62,7 @@ wincheck:
 	
 	# check the - direction
 	lw $t8, index
-	la $s4, board
+	addi $s4, $s0, 0
 	add $s4, $s4, $t8
 	add $t9, $zero, 0
 	add $s2, $s4, 0
@@ -89,10 +89,10 @@ wincheck:
 	# check the | direction
 	li $t0, 0
 	Loop1:
-		move $t2, $t0
+		add $t2, $t0, $s0
 		li $t3, 0
 		Loop2:
-			lb $t1, board($t2)
+			lb $t1, 0($t2)
 			bne $s5, $t1, Cont
 			addi $t2, $t2, 8
 			addi $t3, $t3, 1
