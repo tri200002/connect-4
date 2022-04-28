@@ -25,11 +25,11 @@
 main:
 	# Loads board address into $s0
 	la $s0, board
+	jal drawBoard # graphical
+	
+newGame:
+	jal drawboard # ASCII
 	li $s7, 0	# turn counter
-	
-	jal drawboard
-	jal drawBoard
-	
 	gameplayloop:
 		# put turnCounter % 2 in $t0
 		andi $t0, $s7, 1
@@ -340,7 +340,7 @@ resetBoard:
 	sh $t0, counters+4($zero)
 	sb $t0, counters+6($zero)
 	jal clearBoard
-j main
+j newGame
 
 exit: 
 
