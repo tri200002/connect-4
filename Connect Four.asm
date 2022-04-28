@@ -218,6 +218,25 @@ wincheck:
 	addi $t0, $t0, 8
 	bne $t0, 24, frontDiagonalLoop1
 	
+	# check the | direction
+	li $t0, 0
+	Loop1:
+		beq $t0, 23, breakvertical
+		move $t2, $t0
+		li $t3, 0
+		Loop2:
+			lb $t1, board($t2)
+			bne $s5, $t1, Cont
+			addi $t2, $t2, 8
+			addi $t3, $t3, 1
+			beq $t3, 4, gameEnd
+			j Loop2
+		Cont:
+		addi $t0, $t0, 1
+		j Loop1
+	
+	breakvertical:
+	
 	
 	j drawboard
 				
