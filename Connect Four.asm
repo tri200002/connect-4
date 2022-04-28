@@ -1,183 +1,195 @@
 .data
-userprompt: .asciiz "\nEnter the row (1-7) you want to place your piece: "
-userrow: .word 32
-cpurow: .word 32
-usererror: .asciiz "\nInvalid input. Please enter a row from 1-7" 
-cputurn: .asciiz "\nCPU's turn: "
-board: .ascii "_______\0_______\n_______\n_______\n_______\n_______\n_______\0"
-counters: .word 6, 6, 6, 6, 6, 6, 6
-X: .byte 'X'
-O: .byte 'O'
-turn: .word 0
-wincounter: .word 32
-turncounter: .word 0
-newline: .asciiz "\n"
-currIndex: .word 32
-
-.text
-drawboard:
-	#print newline
-	li $v0, 4
-	la $a0, newline
-	syscall
+	userprompt: 	.asciiz 	"\nEnter the row (1-7) you want to place your piece: "
+	usererror: 		.asciiz 	"\nInvalid input. Please enter a row from 1-7" 
+	cputurn: 		.asciiz 	"\nCPU's turn: "
+	rowFullMsg:		.asciiz		"\nRow is full, choose a different one"
 	
+	TieMsg:			.asciiz	 	"Game was a Tie :|"
+	AIWinMsg:		.asciiz		"You lost :("
+	PlayerWinMsg:	.asciiz		"You Won! :D"
+	
+	.align 2	# word align it
+	board: 			.ascii 		"_______\n_______\n_______\n_______\n_______\n_______\0"
+	
+	.align 2	# word align counters
+	counters: 		.byte 		5, 5, 5, 5, 5, 5, 5
+	
+	index:			.word		0
+
+# ==========================================================================================
+.text
+
+main:
 	# Loads board address into $s0
 	la $s0, board
+	li $s7, 0	# turn counter
+	jal drawboard
 	
-	# load print char argument into $v0
+	gameplayloop:
+		# put turnCounter % 2 in $t0
+		andi $t0, $s7, 1
+		# if turn is even it's player's turn, else AI's
+		bne $t0, $zero, AI
+			jal playerchoice
+			j afterChoice
+		AI:
+			jal AIchoice
+		afterChoice:
+		
+		jal droppiece
+		jal drawboard
+		# increment turn counter
+		addi $s7, $s7, 1
+		jal wincheck
+	j gameplayloop
+
+# ==========================================================================================
+
+drawboard:
+	# print a newline
 	li $v0, 11
-
-	# load start of board into $t0
-	la $t0, 8($s0)
-
-	#initiate counter
-	li $t1, 0
+	la $a0, '\n'
 	
+	li $t1, 0
 	Loop:
-	# print ë|í
-	li $a0, '|'	
-	syscall
+		syscall
+		# print '|'
+		li $a0, '|'	
+		syscall
+		
+		# get next cell of board to print
+		add $a0, $s0, $t1
+		lb $a0, ($a0)
+		# print cell
 
-	# get next cell of board to print
-	add $a0, $t0, $t1
-	lb $a0, ($a0)
-
-	# print cell
-	syscall
-
-	#increment counter
-	addi $t1, $t1, 1
+		#increment counter
+		addi $t1, $t1, 1
 
 	# break loop if we reach a null character
 	bne $a0, '\0', Loop
 	
-	lw $t0, turn
-	beq $t0, $zero, AIchoice
-	j playerchoice
-	
-AIchoice:
-	#Prompt that its CPUs turn and display CPUs choice
-	li $v0, 4
-	la $a0, cputurn
+	# print a newline
+	li $a0, '\n'
 	syscall
-	#Generate random number between 1-7
+
+jr $ra
+
+# ==========================================================================================
+
+AIchoice:
+	# Generate random number between 0-6 inclusive
 	li $v0, 42
-	li $a1, 8
+	li $a1, 7
 	syscall
 	
 	validate:
-		blt $a0, 1, AIchoice
+		# if row is full, choose a new row
+		lb $t0, counters($a0)
+		bltz $t0, AIchoice
 	
+	# save cpu's choice
+	addi $s6, $a0, 0
 	
-	li $v0, 1
+	# Prompt that its CPUs turn
+	li $v0, 4
+	la $a0, cputurn
 	syscall
 	
-	sw $a0, cpurow
+	# print cpu's choice
+	li $v0, 1
+	addi $a0, $s6, 1
+	syscall
 	
-	j droppiece
+	# set $s5 to AI play value
+	li $s5, 'X'
+jr $ra
+
+# ==========================================================================================
+
 playerchoice:
-	#Prompt user for their turn
+	# Prompt user for their turn
+
 	li $v0, 4
 	la $a0, userprompt
 	syscall
 	
-	#Save their input
+	# get user input
 	li $v0, 5
 	syscall
-	sw $v0, userrow
 	
-	#Validate user input
-	li $t0, 7
-	li $t1, 1
-	lw $t2, userrow
-	bgt $t2, $t0, inputerror
-	blt $t2, $t1, inputerror
+	# Validate user input
+		addi $t2, $v0, -1
+		bgt $t2, 6, inputerror
+		blt $t2, 0, inputerror
 	
-	j droppiece
+		# if row is full, choose a new row
+		lb $t0, counters($t2)
+		bltz $t0, inputerror
+		
+	# save user input
+	addi $s6, $t2, 0
+	li $s5, 'O'
+jr $ra
+
 inputerror:
-	#Prompt the error
+	# Prompt the error
 	li $v0, 4
 	la $a0, usererror
 	syscall
-	
-	#Go back to player choice and try again.
-	j playerchoice
-	
-droppiece:
-	lw $t1, turn
-	beq $t1, $zero, AIturn
-	j Playerturn
-	AIturn:
-		#Load cpu's row
-		lw $t1, cpurow
-	
-		#Load X
-		lb $t6, X
-		
-		#Swicth turn
-		lw $t0, turn
-		add $t0, $t0, 1
-		sw $t0, turn
-		j continue
-	Playerturn:
-		#Load user row
-		lw $t1, userrow
-	
-		#Load O
-		lb $t6, O
-		
-		#Change turn
-		lw $t0, turn
-		add $t0, $t0, -1
-		sw $t0, turn
-		
-		j continue
+# Go back to player choice and try again.
+j playerchoice
 
-	continue:
-		#load board address
-		la $t0, board
-		#Get the coressponding row's counter
-		add $t1, $t1, -1
-		mul $t2, $t1, 4
-		lw $t3, counters($t2)
+rowFull:
+	# Prompt the error
+	li $v0, 4
+	la $a0, rowFullMsg
+	syscall
+# Go back to player choice and try again.
+j playerchoice
+
+# ==========================================================================================
+
+droppiece:
+	# Get the coressponding row's counter
+	lb $t3, counters($s6)
 	
-		#Calculate index
-		mul $t4, $t3, 8
-		add $t5, $t4, $t1 #t5 contains index
-		sw $t5, currIndex
-		add $t0, $t0, $t5
-		sb $t6, ($t0)
+	# Calculate index
+	mul $t4, $t3, 8
+	add $t5, $t4, $s6 # t5 contains index
+	sw $t5, index
+	add $t0, $s0, $t5
+	sb $s5, ($t0)
 	
-		#Decrement counter
-		add $t3, $t3, -1
-		sw $t3, counters($t2)
+	#Decrement counter
+	add $t3, $t3, -1
+	sb $t3, counters($s6)
 		
-		j wincheck
+jr $ra
+
+# ==========================================================================================
+	
 wincheck:
-	lw $t9, turncounter
-	beq $t9, 42, main
-	
-	add $s7, $t6, $zero
-	addi $s0, 8
-	
+	# check the \ direction
+
 	li $t0, 0
 	backDiagonalLoop1:
 		add $t4, $t0, $s0
 		
 		li $t1, 0
 		backDiagonalLoop2:
-			add $t4, $t4, $t1
+
+			add $t5, $t4, $t1
 			
 			li $t2, 0 					# loop iterator
 			backDiagonalLoop3:
-				add $t4, $t4, $t2 		# $t4 holds address of cell that needs to be checked
-				lb $t5, 0($t4)
+				add $t6, $t5, $t2 		# $t4 holds address of cell that needs to be checked
+				lb $t7, 0($t6)
 				
 				# if one of the pieces isn't the correct type, we don't need to check any more, it can't be at this location
-				bne $t5, $s7, breakBackDiagonalLoop3
+				bne $t7, $s5, breakBackDiagonalLoop3
 				
-			addi $t2, 9
-			bne $t2, 27, backDiagonalLoop3
+			addi $t2, $t2, 9
+			bne $t2, 36, backDiagonalLoop3
 			j gameEnd					# if the code reaches here, then four are in a row
 			# or alternatively change a register to some value that indicates a win, and jr $ra
 		
@@ -188,40 +200,64 @@ wincheck:
 	addi $t0, $t0, 8
 	bne $t0, 24, backDiagonalLoop1
 	
-	
-	
+	# check the / direction
 	li $t0, 0
 	frontDiagonalLoop1:
 		add $t4, $t0, $s0
 		
-		li $t1, 4
+		li $t1, 3
 		frontDiagonalLoop2:
-			add $t4, $t4, $t1
+			add $t5, $t4, $t1
 			
 			li $t2, 0					# loop iterator
 			frontDiagonalLoop3:
-				add $t4, $t4, $t2 		# $t4 holds address of cell that needs to be checked
-				lb $t5, 0($t4)
+				add $t6, $t5, $t2 		# $t4 holds address of cell that needs to be checked
+				lb $t7, 0($t6)
 				
 				# if one of the pieces isn't the correct type, we don't need to check any more, it can't be at this location
-				bne $t5, $s7, breakFrontDiagonalLoop3
+				bne $t7, $s5, breakFrontDiagonalLoop3
 				
-			addi $t2, 7
-			bne $t2, 21, frontDiagonalLoop3
+			addi $t2, $t2, 7
+			bne $t2, 28, frontDiagonalLoop3
 			j gameEnd					# if the code reaches here, then four are in a row
 			# or alternatively change a register to some value that indicates a win, and jr $ra
 		
 		breakFrontDiagonalLoop3:
 		addi $t1, $t1, 1
-		bne $t1, 8, frontDiagonalLoop2
-	
+		bne $t1, 7, frontDiagonalLoop2
+
 	addi $t0, $t0, 8
 	bne $t0, 24, frontDiagonalLoop1
+	
+	# check the - direction
+	lw $t8, index
+	la $s4, board
+	add $s4, $s4, $t8
+	add $t9, $zero, 0
+	add $s2, $s4, 0
+	rightloop: #Check the right side
+		add $s4, $s4, 1 #Go to the next char
+		lb $s1, ($s4)
+		beq $s1, '\n', leftloop #If next right character is newline check left side
+		bne $s1, $s5, leftloop #If next right character is not the currently played char check left
+		add $t9, $t9, 1 #add 1 to counter if it is the same char
+		beq $t9, 3, gameEnd #If there are 3 neighbouring consec chars + 1 played char, there is a winner
+		j rightloop 
+	
+	leftloop:
+		add $s2, $s2, -1 #Go to the prev char
+		lb $s1, ($s2)
+		beq $s1, '\n', breakhorizontal #If prev left character is newline, there are no winners
+		bne $s1, $s5, breakhorizontal #If prev left character is not the currently played char, there are no winners
+		add $t9, $t9, 1 #add 1 to counter if it is the same char
+		beq $t9, 3, gameEnd #If there are 3 neighbouring consec chars + 1 played char, there is a winner
+		j leftloop
+		
+	breakhorizontal:
 	
 	# check the | direction
 	li $t0, 0
 	Loop1:
-		beq $t0, 23, breakvertical
 		move $t2, $t0
 		li $t3, 0
 		Loop2:
@@ -230,17 +266,45 @@ wincheck:
 			addi $t2, $t2, 8
 			addi $t3, $t3, 1
 			beq $t3, 4, gameEnd
-			j Loop2
-		Cont:
-		addi $t0, $t0, 1
-		j Loop1
+		j Loop2
+	Cont:
+	addi $t0, $t0, 1
+	bne $t0, 23, Loop1
 	
-	breakvertical:
-	
-	
-	j drawboard
-				
-main: 
+	# if all spots are filled
+	beq $s7, 42, Tie
+jr $ra
+
+# ==========================================================================================
+# check who won
+gameEnd:		
+		# if previous turn is odd AI Won, else player won
+		andi $t0, $s7, 1
+		beqz $t0, AIWin
+		
+# print 'You Won! :D', then exit
+PlayerWin:	
+		li $v0, 4
+		la $a0, PlayerWinMsg
+		syscall
+		
+		j exit
+# ===================================
+# print 'You Lost :(', then exit
+AIWin:	
+		li $v0, 4
+		la $a0, AIWinMsg
+		syscall
+		j exit
+# ===================================
+# print 'Game was a Tie :|', then exit
+Tie:			
+		la $a0, TieMsg
+		li $v0, 4
+		syscall
+		li $t4, 57
+# =============		
+exit: 
 	#End program
 	li $v0, 10
 	syscall
