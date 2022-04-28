@@ -108,6 +108,7 @@ jr $ra
 
 playerchoice:
 	# Prompt user for their turn
+
 	li $v0, 4
 	la $a0, userprompt
 	syscall
@@ -169,12 +170,14 @@ jr $ra
 	
 wincheck:
 	# check the \ direction
+
 	li $t0, 0
 	backDiagonalLoop1:
 		add $t4, $t0, $s0
 		
 		li $t1, 0
 		backDiagonalLoop2:
+
 			add $t5, $t4, $t1
 			
 			li $t2, 0 					# loop iterator
@@ -222,7 +225,7 @@ wincheck:
 		breakFrontDiagonalLoop3:
 		addi $t1, $t1, 1
 		bne $t1, 7, frontDiagonalLoop2
-	
+
 	addi $t0, $t0, 8
 	bne $t0, 24, frontDiagonalLoop1
 	
